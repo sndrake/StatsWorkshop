@@ -6,7 +6,7 @@
 
 ---
 
-##Getting the environment set up
+## Getting the environment set up
 
 
 ~~~R
@@ -31,7 +31,7 @@ If you're on a PC, it might look something more like this:
 setwd("C:\Users\Shiloh\Desktop\Experiment Data\")
 ~~~
 
-##Let's Get Going!
+## Let's Get Going!
 
 Now that we're in the right place, let's read in the data file—which should be in your directory already—and save it in the variable "mydata". After that, let's run a few commands to make sure everything imported correctly and looks the way we expected it to.
 
