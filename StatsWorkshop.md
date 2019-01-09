@@ -150,14 +150,49 @@ summary(model.name)
 
 ##### A note about the symbology
 
-The tilda (~) can be read as "as a factor of" or "depends on" (e.g., "Score on the exam depends on number of hours of sleep" for code reading something like `aov(score ~ amt.sleep)`
+The tilda (~) can be read as "as a function of" or "depends on" (e.g., "Score on the exam depends on number of hours of sleep" for code reading something like `aov(score ~ amt.sleep)`.
 
 The asterisk (*) between the independent factors is the **interaction term**. This is used when you think your two factors might interact with each other—for example, you might think that a beginning language student would score lower on the listening task than on the reading task, while an advanced student might have more balanced skills. If you don't expect to have an interaction, or if your interaction is not significant, run another model with a plus sign (+) instead to tell the model not to test for an interaction.
 
-Storing the model in a variable allows you to perform other tests and manipulations on the model itself, such as graphing residuals, testing residuals for normality, or comparing two models to each other. 
+Storing the model in a variable allows you to perform other tests and manipulations on the model itself, such as graphing residuals, testing residuals for normality, or comparing two models to each other. It also means that you don't have a lot of stuff taking up your R console, which may or may not be important to you.
 
 ### Your turn!
 
-For our ANOVA, try creating a model named ANOVA_2, using the factor names from our sample dataset that you loaded in earlier, and the name of the data file.
+For our ANOVA, try creating a model named ANOVA_2, using the factor names from our sample dataset that you loaded in earlier, and the name of the data file. Once you have that, run the `summary()` command too. What do you see?
+
+**Don't scroll past here yet!**
 
 ---
+
+You should have something that looks like this for the model:
+
+~~~R
+ANOVA_2 <- aov(Score ~ Proficiency * Skill, data = mydata)
+
+summary(ANOVA_2)
+~~~
+
+You might have also not used the interaction term, so it looks something like this:
+
+~~~R
+ANOVA_3 <- aov(Score ~ Proficiency + Skill, data = mydata)
+
+summary(ANOVA_3)
+~~~
+
+You should see that there is a significant interaction between Skill and Proficiency, and there are also significant differences between the two levels of Skill (reading/listening) and Proficiency (intermediate/advanced).
+
+Let's also look at the mean scores for each level that we're interested in. To do that, use the command `model.tables(ANOVA_2,"means")`. The first argument in parentheses is the model you want to look at, and the second argument is the descriptive statistic that you want to see.
+
+Hypothetically, let's say you wanted to present this data for a conference, write it up, or maybe show it to your lab members. Humans are visual creatures, so let's put these results in a graph.
+
+~~~R
+# for a bar graph, looking at scores as a function of proficiency
+boxplot(Score ~ Proficiency, data = mydata)
+
+# same thing, looking at scores as a function of skill tested
+boxplot(Score ~ Skill, data = mydata)
+
+# or you can see all of the factors in one graph
+boxplot(Score ~ Skill * Proficiency, data = mydata)
+~~~
