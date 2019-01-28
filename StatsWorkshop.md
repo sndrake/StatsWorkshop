@@ -142,8 +142,8 @@ The basic code for an ANOVA is
 
 ~~~R
 model.name <- aov(dependent.factor ~ 
-					independent.1 * independent.2, 
-					data = csv.file)
+	independent.1 * independent.2,
+	data = csv.file)
 
 summary(model.name)
 ~~~
