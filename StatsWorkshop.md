@@ -1,4 +1,4 @@
-# Two-Way ANOVA and Multiple Regression in R
+# Two-Way ANOVA and Multiple Regression with R
 
 #### Essa Batel, University of Arizona: <essabatel@email.arizona.edu>
 #### [Shiloh Drake][], University of Arizona: <sndrake@email.arizona.edu>
@@ -134,7 +134,7 @@ ANOVAs have two main assumptions. If your data does not follow these assumptions
 1. **Normality:** Your data is normally distributed: you should see a bellcurve or, if your data is linear, the points should not be far off a predictor line.
 2. **Homogeneity of variance:** Each group in your sample should show equal amounts of variance. This means that if you have one group with huge differences and another group with smaller differences, you should not use an ANOVA.
 
-ANOVAs also assume that your factors are **orthagonal** to each other; that is, multiple factors are not related to one another. We typically don't need to worry about that very much in our field, but if you were to include factors like "Participant Age" and "Number of Days Since Birth", those factors would be strongly correlated to each other and would affect your model's accuracy.
+ANOVAs also assume that your factors are **orthogonal** to each other; that is, multiple factors are not related to one another. We typically don't need to worry about that very much in our field, but if you were to include factors like "Participant Age" and "Number of Days Since Birth", those factors would be strongly correlated with each other and would affect your model's accuracy.
 
 ### How to code it
 
@@ -150,7 +150,7 @@ summary(model.name)
 
 ##### A note about the symbology
 
-The tilda (~) can be read as "as a function of" or "depends on" (e.g., "Score on the exam depends on number of hours of sleep" for code reading something like `aov(score ~ amt.sleep)`.
+The tilda (~) can be read as "as a function of" or "depends on" (e.g., "Score on the exam is a function of the number of hours of sleep" for code reading something like `aov(score ~ amt.sleep)`.
 
 The asterisk (*) between the independent factors is the **interaction term**. This is used when you think your two factors might interact with each other—for example, you might think that a beginning language student would score lower on the listening task than on the reading task, while an advanced student might have more balanced skills. If you don't expect to have an interaction, or if your interaction is not significant, run another model with a plus sign (+) instead to tell the model not to test for an interaction.
 
@@ -180,6 +180,8 @@ ANOVA_3 <- aov(Score ~ Proficiency + Skill, data = mydata)
 summary(ANOVA_3)
 ~~~
 
+For now, let's use the function that uses the interaction term (ANOVA_2).
+
 You should see that there is a significant interaction between Skill and Proficiency, and there are also significant differences between the two levels of Skill (reading/listening) and Proficiency (intermediate/advanced).
 
 Let's also look at the mean scores for each level that we're interested in. To do that, use the command `model.tables(ANOVA_2,"means")`. The first argument in parentheses is the model you want to look at, and the second argument is the descriptive statistic that you want to see.
@@ -196,3 +198,39 @@ boxplot(Score ~ Skill, data = mydata)
 # or you can see all of the factors in one graph
 boxplot(Score ~ Skill * Proficiency, data = mydata)
 ~~~
+
+If a line graph is more your speed, we can do that too using the package `lsmeans`.
+
+~~~R
+install.packages(lsmeans)
+require(lsmeans)
+lsmip(ANOVA_2, Proficiency ~ Skill, main="2-Way ANOVA",
+	ylab="Score", xlab="Language Skill",
+	col = c("blue","red"), 
+	par.settings = list(fontsize = list(text = 16, points = 10)))
+~~~
+
+**Your turn:** Describe what your graph looks like!
+
+---
+
+### Post-hoc tests
+The p value of the interaction tells us that there is a significant difference somewhere between the levels of our variables, but we don't know which level is significantly different from the other. Therefore, we have to perform a post-hoc comparison test.
+
+You can choose which comparison to test based on your research question. Checking every possible combination for a significant p value is frowned upon and can potentially lead to a Type I error (incorrectly rejecting the null hypothesis). 
+
+To compare the levels of Proficiency to each level of Skill:  
+`lsmeans(ANOVA_2, pairwise ~ Proficiency | Skill, adjust="bon")`
+
+To compare the levels of Skill to each level of Proficiency:  
+`lsmeans(ANOVA_2, pairwise ~ Skill | Proficiency, adjust="bon")`
+
+To check all possible comparisons:  
+`lsmeans(ANOVA_2, pairwise ~ Skill | Proficiency, adjust="bon")`
+
+The argument `adjust = "bon"` tells the model what kind of alpha criterion adjustment it needs to do. Alpha is (essentially) the same level to which the p value is set; since we're making a lot of comparisons, we need to adjust alpha to avoid a Type I error. This command is for a Bonferroni correction.
+
+You can also use a Tukey test (also called *Tukey's test*, *Tukey's Honest Standard Difference*, and several other variations) to compare every level of one factor to every level of the other. To conceptualize this, a Tukey test is a t-test that corrects for all of the comparisons you're making—essentially the third possibility for the `lsmeans()` command above.  
+`TukeyHSD(ANOVA_2)`
+
+**Your turn:** Compare each of these post-hoc tests to each other. What do you see? Does the Tukey test show you anything different?
