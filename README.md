@@ -8,7 +8,12 @@
 
 ## Introduction
 
-The materials you find in this repository are made for the workshop with the same title, presented at the 2019 Second Language Acquisition and Teaching Roundtable on Feb. 9, 2019. Basic knowledge of R and ANOVAs is assumed.
+The materials you find in this repository are made for the workshop with the same title, presented at the 2019 Second Language Acquisition and Teaching Roundtable on Feb. 8, 2019. Basic knowledge of R and ANOVAs is assumed.
+
+### Workshop Details
+* Date: Friday, Feb. 8, 2019
+* Time: 4:00-5:15 PM
+* Location: Modern Languages 410
 
 ### Workshop Description
 This workshop will introduce the analysis of behavioral data with two-way ANOVA & multiple regression analyses using the statistical software R. We will use a sample dataset with a continuous dependent factor (e.g., test scores, reaction times, and so on) as a result of two categorical independent factors being manipulated (e.g., language proficiency level & language skill).
