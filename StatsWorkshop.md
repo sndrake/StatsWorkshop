@@ -230,7 +230,56 @@ To check all possible comparisons:
 
 The argument `adjust = "bon"` tells the model what kind of alpha criterion adjustment it needs to do. Alpha is (essentially) the same level to which the p value is set; since we're making a lot of comparisons, we need to adjust alpha to avoid a Type I error. This command is for a Bonferroni correction.
 
-You can also use a Tukey test (also called *Tukey's test*, *Tukey's Honest Standard Difference*, and several other variations) to compare every level of one factor to every level of the other. To conceptualize this, a Tukey test is a t-test that corrects for all of the comparisons you're making—essentially the third possibility for the `lsmeans()` command above.  
+You can also use a Tukey test (also called *Tukey's test*, *Tukey's Honest Standard Difference*, and several other variations) to compare every level of one factor to every level of the other. To conceptualize this, a Tukey test is a t-test that corrects for all of the comparisons you're making—essentially the third possibility for the `lsmeans()` command above.
+  
 `TukeyHSD(ANOVA_2)`
 
 **Your turn:** Compare each of these post-hoc tests to each other. What do you see? Does the Tukey test show you anything different?
+
+---
+
+### Testing Assumptions
+
+##### Assumption 1: Normality = The residuals are (relatively) normally distributed along a bell curve.
+
+First, we can plot the residuals themselves:
+
+`hist(residuals(Model_ANOVA))`
+
+We're hoping for a normal histogram curve roughly in the shape of a bell.
+
+We can also use the Shapiro-Wilk test for normality using this code:
+
+`shapiro.test(residuals(Model_ANOVA))`
+
+This is where we do NOT want a significant result—the null hypothesis of the Shapiro-Wilk test is that the residuals are normally distributed.
+
+Finally, we can plot the actual values that were observed against values that are predicted by a model using a or QQ (quantile-quantile) plot. We're looking for the observed values to fall relatively close to the line of predicted values.
+
+`plot(Model_ANOVA,2)`
+
+
+##### Assumption 2: Homogeneity of Variance = The variance of the residuals is relatively even.
+
+To test this, we're going to use the `car` package to do the Levene's test. Note that you can only do this test for the between-subject variable(s)—in this dataset, that's proficiency.
+
+~~~R
+install.packages("car") # you only need to install the package once.
+require(car)
+leveneTest(residuals(Model_ANOVA) ~ Proficiency, data = Mydata) 
+~~~
+
+This is another case where ideally, the test comes out non-significant. If Levene's Test is significant, that means the variance in the residuals is NOT relatively uniform.
+
+
+##### Outliers
+
+We can also visually inspect our data for outliers. It's normal to have a couple outliers, or data points that fall outside the bulk of your data, but it's a problem if you have more than a few.
+
+~~~R
+boxplot(residuals(Model_ANOVA)) # no/few outliers ==> GOOD
+~~~
+
+---
+
+## Multiple Linear Regression
