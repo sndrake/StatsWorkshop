@@ -7,6 +7,7 @@
 	* Assumptions of ANOVA
 	* Between-subjects analysis
 	* Post-hoc comparisons
+	* Graphing your results
 4. Multiple Linear Regression
 	* Between-subjects analysis
 	* Post-hoc comparisons
