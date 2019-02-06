@@ -64,7 +64,7 @@ Now that we're in the right place, let's **read in the data file**—which shoul
 # the 'header' argument should be TRUE if the first row of your CSV file names the columns.
 # otherwise, it defaults to FALSE.
 
-mydata <- read.csv("Sample_2.csv", header = TRUE, sep = ",")
+mydata <- read.csv("Sample_R.csv", header = TRUE, sep = ",")
 
 # make sure R treats the way you name associate subject data as a factor!
 mydata$Participants <- as.factor(mydata$Participants)
