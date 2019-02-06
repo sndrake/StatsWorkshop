@@ -1,7 +1,5 @@
 # Two-Way ANOVA and Multiple Regression with R
 
----
-
 ## Table of Contents
 1. Getting the environment set up
 2. Loading the data and descriptive statistics
