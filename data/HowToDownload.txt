@@ -1,0 +1,7 @@
+To download the data file and the R script:
+
+1. Click on the file name
+2. Right-click on the button in the upper right-hand side that says "Raw"
+3. Select "Download linked file"
+
+Then you'll be able to open it from the place that your computer downloads files to.
