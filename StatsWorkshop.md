@@ -1,9 +1,5 @@
 # Two-Way ANOVA and Multiple Regression with R
 
-#### Essa Batel, University of Arizona: <essabatel@email.arizona.edu>
-#### [Shiloh Drake][], University of Arizona: <sndrake@email.arizona.edu>
-[Shiloh Drake]: http://www.shilohdrake.com
-
 ---
 
 ## Table of Contents
@@ -14,10 +10,10 @@
 	* Between-subjects analysis
 	* Post-hoc comparisons
 4. Multiple Linear Regression
-	* Assumptions of multiple regression
 	* Between-subjects analysis
 	* Post-hoc comparisons
 	* Graphing your results
+	* Calculating effect size
 
 ---
 
@@ -50,6 +46,15 @@ If you're on a PC, it might look something more like this:
 setwd("C:\Users\Shiloh\Desktop\Experiment Data\")
 ~~~
 
+For this workshop, we're going to be using a few specific packages. If you don't have them installed already, go ahead and run the following codes:
+
+~~~R
+install.packages("psych")
+install.packages("lsmeans")
+install.packages("car")
+install.packages("lmSupport")
+~~~
+
 ## Let's Get Going!
 ### Loading the data and descriptive analyses
 
@@ -60,7 +65,7 @@ Now that we're in the right place, let's **read in the data file**—which shoul
 # the 'header' argument should be TRUE if the first row of your CSV file names the columns.
 # otherwise, it defaults to FALSE.
 
-mydata <- read.csv("Exam_Scores.csv", header = TRUE, sep = ",")
+mydata <- read.csv("Sample_2.csv", header = TRUE, sep = ",")
 
 # make sure R treats the way you name associate subject data as a factor!
 mydata$Participants <- as.factor(mydata$Participants)
@@ -78,13 +83,7 @@ head(mydata)
 tail(mydata)
 ~~~
 
-Let's also run a basic analysis of our data. We'll be using the `psych` package to do that. If you have never used this package before, you'll need to install it:
-
-~~~R
-install.packages("psych")
-~~~
-
-Then we need to **load the package**. You can either go to the "Packages" tab on the right-hand side of the RStudio window and click the checkbox next to `psych`, or you can run one of the following commands:
+Let's also run a basic analysis of our data. We'll be using the `psych` package to do that. To use it, we need to **load the package**. You can either go to the "Packages" tab on the right-hand side of the RStudio window and click the checkbox next to `psych`, or you can run one of the following commands:
 
 ~~~R
 library(psych)
@@ -104,7 +103,7 @@ describe(mydata)
 # OR you can describe individual variables:
 
 describeBy(mydata$Score, mydata$Proficiency)
-describeBy(mydata$Score, mydata$Skill)
+describeBy(mydata$Score, mydata$Intervention)
 
 ~~~
 
@@ -118,11 +117,11 @@ In this dataset, we have two independent variables and one dependent variable.
 
 | Type | Factor | Levels |
 | :---: | :---: | :---: |
-| Independent | Skill | Listening, Reading |
+| Independent | Intervention | Before, After |
 | Independent | Proficiency | Intermediate, Advanced |
 | Dependent | Score | continuous variable |
 
-It should make intuitive sense that a person's score on a language exam will change based on whether they are at an intermediate or an advanced level, and also that the score will change depending on the skill they are being tested on. 
+It should make intuitive sense that a person's score on a language exam will change based on whether they are at an intermediate or an advanced level, and also that the score will change depending on the when they receive the intervention. 
 
 ## Two-Way Analysis with ANOVA
 ### Assuptions
@@ -152,7 +151,7 @@ summary(model.name)
 
 The tilda (~) can be read as "as a function of" or "depends on" (e.g., "Score on the exam is a function of the number of hours of sleep" for code reading something like `aov(score ~ amt.sleep)`.
 
-The asterisk (*) between the independent factors is the **interaction term**. This is used when you think your two factors might interact with each other—for example, you might think that a beginning language student would score lower on the listening task than on the reading task, while an advanced student might have more balanced skills. If you don't expect to have an interaction, or if your interaction is not significant, run another model with a plus sign (+) instead to tell the model not to test for an interaction.
+The asterisk (*) between the independent factors is the **interaction term**. This is used when you think your two factors might interact with each other—for example, you might think that a beginning language student would score lower on a listening task than on the reading task, while an advanced student might have more balanced skills. If you don't expect to have an interaction, or if your interaction is not significant, run another model with a plus sign (+) instead to tell the model not to test for an interaction.
 
 Storing the model in a variable allows you to perform other tests and manipulations on the model itself, such as graphing residuals, testing residuals for normality, or comparing two models to each other. It also means that you don't have a lot of stuff taking up your R console, which may or may not be important to you.
 
@@ -167,7 +166,7 @@ For our ANOVA, try creating a model named ANOVA_2, using the factor names from o
 You should have something that looks like this for the model:
 
 ~~~R
-ANOVA_2 <- aov(Score ~ Proficiency * Skill, data = mydata)
+ANOVA_2 <- aov(Score ~ Proficiency * Intervention, data = mydata)
 
 summary(ANOVA_2)
 ~~~
@@ -175,14 +174,14 @@ summary(ANOVA_2)
 You might have also not used the interaction term, so it looks something like this:
 
 ~~~R
-ANOVA_3 <- aov(Score ~ Proficiency + Skill, data = mydata)
+ANOVA_3 <- aov(Score ~ Proficiency + Intervention, data = mydata)
 
 summary(ANOVA_3)
 ~~~
 
 For now, let's use the function that uses the interaction term (ANOVA_2).
 
-You should see that there is a significant interaction between Skill and Proficiency, and there are also significant differences between the two levels of Skill (reading/listening) and Proficiency (intermediate/advanced).
+You should see that there is a significant interaction between Intervention and Proficiency, and there are also significant differences between the two levels of Intervention (before/after) and Proficiency (intermediate/advanced).
 
 Let's also look at the mean scores for each level that we're interested in. To do that, use the command `model.tables(ANOVA_2,"means")`. The first argument in parentheses is the model you want to look at, and the second argument is the descriptive statistic that you want to see.
 
@@ -192,11 +191,11 @@ Hypothetically, let's say you wanted to present this data for a conference, writ
 # for a bar graph, looking at scores as a function of proficiency
 boxplot(Score ~ Proficiency, data = mydata)
 
-# same thing, looking at scores as a function of skill tested
-boxplot(Score ~ Skill, data = mydata)
+# same thing, looking at scores as a function of Intervention
+boxplot(Score ~ Intervention, data = mydata)
 
 # or you can see all of the factors in one graph
-boxplot(Score ~ Skill * Proficiency, data = mydata)
+boxplot(Score ~ Intervention * Proficiency, data = mydata)
 ~~~
 
 If a line graph is more your speed, we can do that too using the package `lsmeans`.
@@ -204,8 +203,8 @@ If a line graph is more your speed, we can do that too using the package `lsmean
 ~~~R
 install.packages(lsmeans)
 require(lsmeans)
-lsmip(ANOVA_2, Proficiency ~ Skill, main="2-Way ANOVA",
-	ylab="Score", xlab="Language Skill",
+lsmip(ANOVA_2, Proficiency ~ Intervention, main="2-Way ANOVA",
+	ylab="Score", xlab="Language Intervention",
 	col = c("blue","red"), 
 	par.settings = list(fontsize = list(text = 16, points = 10)))
 ~~~
@@ -219,14 +218,14 @@ The p value of the interaction tells us that there is a significant difference s
 
 You can choose which comparison to test based on your research question. Checking every possible combination for a significant p value is frowned upon and can potentially lead to a Type I error (incorrectly rejecting the null hypothesis). 
 
-To compare the levels of Proficiency to each level of Skill:  
-`lsmeans(ANOVA_2, pairwise ~ Proficiency | Skill, adjust="bon")`
+To compare the levels of Proficiency to each level of Intervention:  
+`lsmeans(ANOVA_2, pairwise ~ Proficiency | Intervention, adjust="bon")`
 
-To compare the levels of Skill to each level of Proficiency:  
-`lsmeans(ANOVA_2, pairwise ~ Skill | Proficiency, adjust="bon")`
+To compare the levels of Intervention to each level of Proficiency:  
+`lsmeans(ANOVA_2, pairwise ~ Intervention | Proficiency, adjust="bon")`
 
 To check all possible comparisons:  
-`lsmeans(ANOVA_2, pairwise ~ Skill | Proficiency, adjust="bon")`
+`lsmeans(ANOVA_2, pairwise ~ Intervention | Proficiency, adjust="bon")`
 
 The argument `adjust = "bon"` tells the model what kind of alpha criterion adjustment it needs to do. Alpha is (essentially) the same level to which the p value is set; since we're making a lot of comparisons, we need to adjust alpha to avoid a Type I error. This command is for a Bonferroni correction.
 
@@ -264,7 +263,6 @@ Finally, we can plot the actual values that were observed against values that ar
 To test this, we're going to use the `car` package to do the Levene's test. Note that you can only do this test for the between-subject variable(s)—in this dataset, that's proficiency.
 
 ~~~R
-install.packages("car") # you only need to install the package once.
 require(car)
 leveneTest(residuals(Model_ANOVA) ~ Proficiency, data = Mydata) 
 ~~~
@@ -351,7 +349,7 @@ leveneTest(residuals(Reg_model) ~ Proficiency, data= Mydata)
 boxplot(residuals(Reg_model)) # no/few outliers ==> GOOD
 ~~~
 
-A lot of the time, you'll also want to have a visual representation of your results. In this case, we will use a line graph to show how scores improve as a function of intervention and skill tested.
+A lot of the time, you'll also want to have a visual representation of your results. In this case, we will use a line graph to show how scores improve as a function of proficiency and intervention.
 
 ~~~R
 # For a line graph
