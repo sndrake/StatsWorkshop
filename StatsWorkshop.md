@@ -381,5 +381,5 @@ The effect of Intervention is 0.183: 18.3 % of the variance in the Score is expl
 
 The effect of the Proficiency-Intervention interaction is 0.066: 6.6% of the variance in the Score is explained by interaction between  Proficiency & Intervention.
 
-Notice that the percentages don't sum to 100%. 28.5% of the variance isn't explained by any of the factors. This is fairly ordinary—it would be incredible to explain all of the variation in your data!
+Notice that the percentages don't sum to 100%. 28.5% of the variance isn't explained by any of the factors. This is fairly ordinary—it would be incredible to explain all of the variation in your data! However, in the fuzzy world of social sciences, a model that explains 71.5% of the variance in scores is still very rare to see.
 
