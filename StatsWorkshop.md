@@ -129,7 +129,7 @@ It should make intuitive sense that a person's score on a language exam will cha
 
 First and foremost, you can use a two-way ANOVA if and only if you have exactly two independent factors (or variables). If you only have one independent variable, you must instead use a one-way ANOVA.
 
-ANOVAs have two main assumptions. If your data does not follow these assumptions, this is not the test you should be using either; instead, you will need to use a [WORD] test.
+ANOVAs have two main assumptions. If your data does not follow these assumptions, this is not the test you should be using either; instead, you will need to use a non-parametric test.
 
 1. **Normality:** Your data is normally distributed: you should see a bellcurve or, if your data is linear, the points should not be far off a predictor line.
 2. **Homogeneity of variance:** Each group in your sample should show equal amounts of variance. This means that if you have one group with huge differences and another group with smaller differences, you should not use an ANOVA.
@@ -280,6 +280,106 @@ We can also visually inspect our data for outliers. It's normal to have a couple
 boxplot(residuals(Model_ANOVA)) # no/few outliers ==> GOOD
 ~~~
 
+**Your turn:** Perform at least one of the tests of the assumptions on your data. What do you see?
+
 ---
 
 ## Multiple Linear Regression
+
+For the multiple linear regression, we're going to do a between-subjects analysis and use the same dataset as before. The basic code for a linear regression is:
+
+~~~R
+model name <- lm (dependent.factor ~ 
+					independent.1 * independent.2,
+					data = csv.file)
+~~~
+
+**Your turn:** Let's call our model "Reg_model". How do you create the model and get a summary for it? (Don't scroll down yet!)
+
+---
+
+You should have something like this for the code:
+
+~~~R
+Reg_model<- lm (Score ~ Proficiency * Intervention, data=Mydata)    
+summary(Reg_model)
+~~~
+
+Take a look at the summary of the model. You should be able to see all of the factors, the interactions, whether anything is significant, and so on. Check for these things in your summary:
+
+* Adjusted R-squared: the amount of variance explained by the variable. In this case, 67.33% of the variance in the Score variable is explained by when the intervention occurred. Because this is such a high percentage, you can interpret this as an important factor in your research!
+* Intercept: the mean of the Score variable. The mean score that participants received was 86.13.
+* ProficiencyIntermediate: Being at the Intermediate level is expected to decrease the mean of Score by 11.26 points (or being at the Advanced level is expected to increase the mean of Score by 11.26 points), and that is statistically significant.
+* The mean of Score is expected to increase by 7 points after the intervention (since InterventionBefore = -7), and that is statistically significant.
+* The mean Score is expected to increase by 6 points as a result of the interaction between Intervention and Proficiency level, and that is also statistically significant.
+
+Just like in the ANOVA, we have to perform post-hoc tests due to our significant interaction between Intervention and Proficiency. We can use the `lsmeans()` function just like we did before, but substituting the name of our regression model.
+
+~~~R
+# Levels of Proficiency on each level of Intervention
+lsmeans(Reg_model, pairwise ~ Proficiency | Intervention, adjust="tukey") 
+
+# Levels of Intervention on each level of Proficiency
+lsmeans(Reg_model, pairwise ~ Intervention | Proficiency, adjust="tukey") 
+
+# All possible comparsions 
+lsmeans(Reg_model, pairwise ~ Intervention * Proficiency, adjust="tukey")
+~~~
+
+#### Assumptions
+
+Linear regression has the same assumptions that ANOVA does, along with an additional assumption that your data is linear. If you have categorial data (e.g., participants' responses to each stimulus being marked correct or incorrect), you need to use a different test. Fortunately, we can still use the same functions as before.
+
+
+~~~R
+# Assumption 1: Normality
+hist(residuals(Reg_model)) # We're hoping for a normal bell curve
+
+shapiro.test(residuals(Reg_model)) # If NOT significant ==> GOOD
+
+# QQ-plot 
+plot(Reg_model,2)  
+
+
+# Assumption 2: Homogeneity of Variance
+require(car)
+leveneTest(residuals(Reg_model) ~ Proficiency, data= Mydata)
+# only for the bewteen-subjects variable (here, Proficiency).
+# If NOT significant ==> GOOD
+
+# Outliers
+boxplot(residuals(Reg_model)) # no/few outliers ==> GOOD
+~~~
+
+A lot of the time, you'll also want to have a visual representation of your results. In this case, we will use a line graph to show how scores improve as a function of intervention and skill tested.
+
+~~~R
+# For a line graph
+require(lsmeans)
+lsmip(Reg_model, Proficiency ~ Intervension, main="Multiple Regression",
+		ylab="Score", xlab="Effect of Intervension", 
+		col = c("blue","red"),
+		par.settings = list(fontsize = list(text = 16, points = 10)))
+~~~
+
+---
+
+Depending on your specific field (and potentially also the journal you submit work to), you may need to report effect sizes. No matter how small your p value is, it doesn't tell you anything about how big of an effect you're seeing—it's just the probability that you would see the results that you have due to chance alone.
+
+According to Cohen (1988), 80% or above is considered a large effect, 50% is considered a moderate effect, and 20% is considered a small effect.
+
+~~~R
+# Effect size of each predictor separately
+install.packages("lmSupport")
+require(lmSupport)
+modelEffectSizes(Reg_model) # Look at dR-sqr column 
+~~~
+
+The effect of Proficiency is 0.466: 46.6% of the variance in the Score is explained by Proficiency. 
+
+The effect of Intervention is 0.183: 18.3 % of the variance in the Score is explained by Intervention. 
+
+The effect of the Proficiency-Intervention interaction is 0.066: 6.6% of the variance in the Score is explained by interaction between  Proficiency & Intervention.
+
+Notice that the percentages don't sum to 100%. 28.5% of the variance isn't explained by any of the factors. This is fairly ordinary—it would be incredible to explain all of the variation in your data!
+
