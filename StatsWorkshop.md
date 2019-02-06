@@ -92,6 +92,8 @@ library(psych)
 require(psych)
 ~~~
 
+Now would also be a good time to load the other packages using the `library()` or `require()` commands.
+
 All of these methods accomplish the same thing, so you can do whatever you find is the most intuitive. If you have a lot of packages installed, you might find it easiest to use the `library` or `require` commands rather than the checkbox.
 
 Use `describe` to see some descriptive statistics (mean, median, standard deviation, standard error, etc.) about your data.
@@ -139,16 +141,17 @@ ANOVAs also assume that your factors are **orthogonal** to each other; that is, 
 The basic code for an ANOVA is
 
 ~~~R
-model.name <- aov(dependent.factor ~ 
+require(car)
+model.name <- lm(dependent.factor ~ 
 	independent.1 * independent.2,
 	data = csv.file)
 
-summary(model.name)
+Anova(model.name)
 ~~~
 
 ##### A note about the symbology
 
-The tilda (~) can be read as "as a function of" or "depends on" (e.g., "Score on the exam is a function of the number of hours of sleep" for code reading something like `aov(score ~ amt.sleep)`.
+The tilda (~) can be read as "as a function of" or "depends on" (e.g., "Score on the exam is a function of the number of hours of sleep" for code reading something like `lm(score ~ amt.sleep)`.
 
 The asterisk (*) between the independent factors is the **interaction term**. This is used when you think your two factors might interact with each other—for example, you might think that a beginning language student would score lower on a listening task than on the reading task, while an advanced student might have more balanced skills. If you don't expect to have an interaction, or if your interaction is not significant, run another model with a plus sign (+) instead to tell the model not to test for an interaction.
 
@@ -156,7 +159,7 @@ Storing the model in a variable allows you to perform other tests and manipulati
 
 ### Your turn!
 
-For our ANOVA, try creating a model named ANOVA_2, using the factor names from our sample dataset that you loaded in earlier, and the name of the data file. Once you have that, run the `summary()` command too. What do you see?
+For our ANOVA, try creating a model named ANOVA_2, using the factor names from our sample dataset that you loaded in earlier, and the name of the data file. Once you have that, run the `Anova()` command too. What do you see?
 
 **Don't scroll past here yet!**
 
@@ -165,17 +168,17 @@ For our ANOVA, try creating a model named ANOVA_2, using the factor names from o
 You should have something that looks like this for the model:
 
 ~~~R
-ANOVA_2 <- aov(Score ~ Proficiency * Intervention, data = mydata)
+ANOVA_2 <- lm(Score ~ Proficiency * Intervention, data = mydata)
 
-summary(ANOVA_2)
+Anova(ANOVA_2)
 ~~~
 
 You might have also not used the interaction term, so it looks something like this:
 
 ~~~R
-ANOVA_3 <- aov(Score ~ Proficiency + Intervention, data = mydata)
+ANOVA_3 <- lm(Score ~ Proficiency + Intervention, data = mydata)
 
-summary(ANOVA_3)
+Anova(ANOVA_3)
 ~~~
 
 For now, let's use the function that uses the interaction term (ANOVA_2).
@@ -262,7 +265,6 @@ Finally, we can plot the actual values that were observed against values that ar
 To test this, we're going to use the `car` package to do the Levene's test. Note that you can only do this test for the between-subject variable(s)—in this dataset, that's proficiency.
 
 ~~~R
-require(car)
 leveneTest(residuals(Model_ANOVA) ~ Proficiency, data = Mydata) 
 ~~~
 
@@ -302,13 +304,19 @@ Reg_model<- lm (Score ~ Proficiency * Intervention, data=Mydata)
 summary(Reg_model)
 ~~~
 
-Take a look at the summary of the model. You should be able to see all of the factors, the interactions, whether anything is significant, and so on. Check for these things in your summary:
+Take a look at the summary of the model. You should be able to see all of the factors, the interactions, whether anything is significant, and so on. Check for these things in your summary to interpret your model:
 
 * Adjusted R-squared: the amount of variance explained by the variable. In this case, 67.33% of the variance in the Score variable is explained by when the intervention occurred. Because this is such a high percentage, you can interpret this as an important factor in your research!
-* Intercept: the mean of the Score variable. The mean score that participants received was 86.13.
-* ProficiencyIntermediate: Being at the Intermediate level is expected to decrease the mean of Score by 11.26 points (or being at the Advanced level is expected to increase the mean of Score by 11.26 points), and that is statistically significant.
-* The mean of Score is expected to increase by 7 points after the intervention (since InterventionBefore = -7), and that is statistically significant.
+* Intercept: the baseline of the model, which the numbers in the "Estimate" column are added to or subtracted from. The mean score that Advanced participants with the interventioning happening After received was 86.13.
+* ProficiencyIntermediate: the Intermediate/After group is expected to decrease the mean of Score by 11.26 points (or being at the Advanced level is expected to increase the mean of Score by 11.26 points), and that is statistically significant.
+* The Score is expected to increase by 7 points after the intervention (since InterventionBefore = -7), and that is statistically significant.
 * The mean Score is expected to increase by 6 points as a result of the interaction between Intervention and Proficiency level, and that is also statistically significant.
+
+You can get a nice table of score means for each level by using the `aggregate()` function. Doing this will give you concrete numbers for the model estimates if you don't want to do math. :)
+
+~~~R
+aggregate(Score ~ Proficiency * Intervention, data = mydata, mean)
+~~~
 
 Just like in the ANOVA, we have to perform post-hoc tests due to our significant interaction between Intervention and Proficiency. We can use the `lsmeans()` function just like we did before, but substituting the name of our regression model.
 
@@ -379,4 +387,3 @@ The effect of Intervention is 0.183: 18.3 % of the variance in the Score is expl
 The effect of the Proficiency-Intervention interaction is 0.066: 6.6% of the variance in the Score is explained by interaction between  Proficiency & Intervention.
 
 Notice that the percentages don't sum to 100%. 28.5% of the variance isn't explained by any of the factors. This is fairly ordinary—it would be incredible to explain all of the variation in your data! However, in the fuzzy world of social sciences, a model that explains 71.5% of the variance in scores is still very rare to see.
-
