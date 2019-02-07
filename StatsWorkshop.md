@@ -159,7 +159,7 @@ Storing the model in a variable allows you to perform other tests and manipulati
 
 ### Your turn!
 
-For our ANOVA, try creating a model named ANOVA_2, using the factor names from our sample dataset that you loaded in earlier, and the name of the data file. Once you have that, run the `Anova()` command too. What do you see?
+For our ANOVA, try creating a model named Model_ANOVA, using the factor names from our sample dataset that you loaded in earlier, and the name of the data file. Once you have that, run the `Anova()` command too. What do you see?
 
 **Don't scroll past here yet!**
 
@@ -168,9 +168,9 @@ For our ANOVA, try creating a model named ANOVA_2, using the factor names from o
 You should have something that looks like this for the model:
 
 ~~~R
-ANOVA_2 <- lm(Score ~ Proficiency * Intervention, data = mydata)
+Model_ANOVA <- lm(Score ~ Proficiency * Intervention, data = mydata)
 
-Anova(ANOVA_2)
+Anova(Model_ANOVA)
 ~~~
 
 You might have also not used the interaction term, so it looks something like this:
@@ -181,11 +181,11 @@ ANOVA_3 <- lm(Score ~ Proficiency + Intervention, data = mydata)
 Anova(ANOVA_3)
 ~~~
 
-For now, let's use the function that uses the interaction term (ANOVA_2).
+For now, let's use the function that uses the interaction term (Model_ANOVA).
 
 You should see that there is a significant interaction between Intervention and Proficiency, and there are also significant differences between the two levels of Intervention (before/after) and Proficiency (intermediate/advanced).
 
-Let's also look at the mean scores for each level that we're interested in. To do that, use the command `model.tables(ANOVA_2,"means")`. The first argument in parentheses is the model you want to look at, and the second argument is the descriptive statistic that you want to see.
+Let's also look at the mean scores for each level that we're interested in. To do that, use the command `model.tables(Model_ANOVA,"means")`. The first argument in parentheses is the model you want to look at, and the second argument is the descriptive statistic that you want to see.
 
 Hypothetically, let's say you wanted to present this data for a conference, write it up, or maybe show it to your lab members. Humans are visual creatures, so let's put these results in a graph.
 
@@ -205,7 +205,7 @@ If a line graph is more your speed, we can do that too using the package `lsmean
 ~~~R
 install.packages(lsmeans)
 require(lsmeans)
-lsmip(ANOVA_2, Proficiency ~ Intervention, main="2-Way ANOVA",
+lsmip(Model_ANOVA, Proficiency ~ Intervention, main="2-Way ANOVA",
 	ylab="Score", xlab="Language Intervention",
 	col = c("blue","red"), 
 	par.settings = list(fontsize = list(text = 16, points = 10)))
@@ -221,19 +221,19 @@ The p value of the interaction tells us that there is a significant difference s
 You can choose which comparison to test based on your research question. Checking every possible combination for a significant p value is frowned upon and can potentially lead to a Type I error (incorrectly rejecting the null hypothesis). 
 
 To compare the levels of Proficiency to each level of Intervention:  
-`lsmeans(ANOVA_2, pairwise ~ Proficiency | Intervention, adjust="bon")`
+`lsmeans(Model_ANOVA, pairwise ~ Proficiency | Intervention, adjust="bon")`
 
 To compare the levels of Intervention to each level of Proficiency:  
-`lsmeans(ANOVA_2, pairwise ~ Intervention | Proficiency, adjust="bon")`
+`lsmeans(Model_ANOVA, pairwise ~ Intervention | Proficiency, adjust="bon")`
 
 To check all possible comparisons:  
-`lsmeans(ANOVA_2, pairwise ~ Intervention | Proficiency, adjust="bon")`
+`lsmeans(Model_ANOVA, pairwise ~ Intervention | Proficiency, adjust="bon")`
 
 The argument `adjust = "bon"` tells the model what kind of alpha criterion adjustment it needs to do. Alpha is (essentially) the same level to which the p value is set; since we're making a lot of comparisons, we need to adjust alpha to avoid a Type I error. This command is for a Bonferroni correction.
 
 You can also use a Tukey test (also called *Tukey's test*, *Tukey's Honest Standard Difference*, and several other variations) to compare every level of one factor to every level of the other. To conceptualize this, a Tukey test is a t-test that corrects for all of the comparisons you're making—essentially the third possibility for the `lsmeans()` command above.
   
-`TukeyHSD(ANOVA_2)`
+`TukeyHSD(Model_ANOVA)`
 
 **Your turn:** Compare each of these post-hoc tests to each other. What do you see? Does the Tukey test show you anything different?
 
@@ -371,7 +371,7 @@ lsmip(Reg_model, Proficiency ~ Intervension, main="Multiple Regression",
 
 Depending on your specific field (and potentially also the journal you submit work to), you may need to report effect sizes. No matter how small your p value is, it doesn't tell you anything about how big of an effect you're seeing—it's just the probability that you would see the results that you have due to chance alone.
 
-According to Cohen (1988), 80% or above is considered a large effect, 50% is considered a moderate effect, and 20% is considered a small effect.
+According to Cohen (1988), 80% or above is considered a large effect, 50% is considered a moderate effect, and 20% or lower is considered a small effect.
 
 ~~~R
 # Effect size of each predictor separately
@@ -384,6 +384,6 @@ The effect of Proficiency is 0.466: 46.6% of the variance in the Score is explai
 
 The effect of Intervention is 0.183: 18.3 % of the variance in the Score is explained by Intervention. 
 
-The effect of the Proficiency-Intervention interaction is 0.066: 6.6% of the variance in the Score is explained by interaction between  Proficiency & Intervention.
+The effect of the Proficiency-Intervention interaction is 0.066: 6.6% of the variance in the Score is explained by the interaction between  Proficiency & Intervention.
 
 Notice that the percentages don't sum to 100%. 28.5% of the variance isn't explained by any of the factors. This is fairly ordinary—it would be incredible to explain all of the variation in your data! However, in the fuzzy world of social sciences, a model that explains 71.5% of the variance in scores is still very rare to see.
