@@ -18,6 +18,8 @@
 
 ## Getting the environment set up
 
+First and foremost, go ahead and download the documents in the "data" folder. Those are the R script and the data file you'll be working with.
+
 ~~~R
 rm(list = ls(all = TRUE))
 ~~~
