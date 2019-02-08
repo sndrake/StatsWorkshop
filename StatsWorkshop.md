@@ -18,7 +18,7 @@
 
 ## Getting the environment set up
 
-First and foremost, go ahead and download the documents in the "data" folder. Those are the R script and the data file you'll be working with.
+Go ahead and download the documents in the "data" folder. Those are the R script and the data file you'll be working with.
 
 ~~~R
 rm(list = ls(all = TRUE))
@@ -130,9 +130,6 @@ It should make intuitive sense that a person's score on a language exam will cha
 ## Multiple Linear Regression
 
 ### Assuptions
-
-First and foremost, you can use a two-way ANOVA if and only if you have exactly two independent factors (or variables). If you only have one independent variable, you must instead use a one-way ANOVA.
-
 ANOVAs and linear regressions have two main assumptions. If your data does not follow these assumptions, this is not the test you should be using either; instead, you will need to use a non-parametric test.
 
 1. **Normality:** Your data is normally distributed: you should see a bellcurve or, if your data is linear, the points should not be far off a predictor line.
@@ -282,6 +279,9 @@ Notice that the percentages don't sum to 100%. 28.5% of the variance isn't expla
 
 
 ## Two-Way Analysis with ANOVA
+
+Importantly, you can use a two-way ANOVA if and only if you have exactly two independent factors (or variables). If you only have one independent variable, you must instead use a one-way ANOVA.
+
 ### How to code it
 
 The basic code for an ANOVA is
