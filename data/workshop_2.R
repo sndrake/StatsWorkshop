@@ -1,9 +1,12 @@
 
 # Install the following packages by highlighting the following codes and click Run:
-# install.packages("psych")
-# install.packages("lsmeans")
-# install.packages("car")
-# install.packages("lmSupport")
+install.packages("ggplot")
+install.packages("psych")
+install.packages("lsmeans")
+install.packages("car")
+install.packages("lmSupport")
+# If lmSupport doesn't work right away, you might also need to run the following line:
+# install.packages("reshape")
 
 
 # set the working directory (this is where your data files are stored):
@@ -14,7 +17,7 @@
 # 4. Paste this title between the quotation marks "" in the code below 
 
 
-setwd("/Users/essa/Dropbox/U of A/Talks and conferences/SLAT Workshop R/SLAT Roundtable 19/2-way Anova + Multiple Regression") 
+setwd("")
 # click Run  ++++++++++++++
 
 
@@ -50,13 +53,118 @@ describe(Mydata) #  ++++++++++++++
 
 
 
+# ----------------------------------------------------------------------------------
+# Multiple Linear Regression (More than ONE variables/factors)
+# Between-Subject Analysis
+# ----------------------------------------------------------------------------------
+
+# model name <- lm (Dependent ~ Indep.1 * Indep.2 , data frame = data file name)
+# let's call our model Reg_model.
+
+# -----------------------------------------------------------------------------------------------------------------------
+
+# Multiple Regression model
+Reg_model<- lm (Score ~ Proficiency * Intervention, data=Mydata)    
+summary(Reg_model) # Expected changes in Score relative to the reference groups == Advanced + After
+
+#  p > 0.05*  |   p > 0.01**   |    p > 0.001***
+
+
+#  Adjusted R-squared: 0.6733 ==> 67.3 % the variance in the predicted Score is explained 
+# by the effect of both Intervention and Proficiency above and beyond all other factors.
+# (which is a high percentage)
+
+levels(Mydata$Proficiency) 
+levels(Mydata$Intervention) 
+#  Intercept = Adavnced/After 
+
+# 1. The mean score of our baseline (Advanced/After) is 86.13 (look at the intercept value) 
+# above and beyond all other predictors. 
+
+
+# 2. The difference between the mean score of Intermediate/After and Advanced/After = 11.26 points apart), 
+# and that is statistically significant.(Intermediate/After = 86.13 - 11.27= 74.86667)
+
+# 2. The difference between the mean of Advanced/Before and Advanced/After = 7.06 points apart), 
+# and that is statistically significant.(Advanced/Before  = 86.13 - 7.06= 79.06)
+
+# 2. The difference between the mean of Intermediate/Before and Advanced/After = 86.1333 -11.26 -7.0667 + 6.00 = 73.80) 
+# and that is statistically significant.(Intermediate/Before  = 73.80)
+
+# 5. Because of the significant interaction, we will perform a post-hoc multiple comparsion:
+
+# we will use "lsmeans" fucntion 
+require(lsmeans)
+# you can choose which comparsion you want more based on your research question:
+
+# Levels of Skill on each Proficiency
+lsmeans(Reg_model, pairwise ~ Intervention | Proficiency, adjust="tukey") 
+
+# Levels of Proficiency on each Skill
+lsmeans(Reg_model, pairwise ~ Proficiency | Intervention, adjust="tukey") 
+
+# All possible comparsions (Just in case you need that!)
+# lsmeans(Reg_model, pairwise ~ Intervention * Proficiency, adjust="tukey") 
+
+
+
+# Tests of assumptions
+
+# Assumption 1: Normality
+hist(residuals(Reg_model)) # We hope for a normal histogram curve (Bell shape)
+shapiro.test(residuals(Reg_model)) # If NOT significant ==> GOOD
+
+# QQ-plot 
+plot(Reg_model,2)  
+
+
+# Assumption 2: Homogeneity of Variance
+# require(car)
+leveneTest(residuals(Reg_model) ~ Proficiency, data= Mydata) # only for the bewteen-subjects variable.
+# If NOT significant ==> GOOD
+
+# Outliers
+boxplot(residuals(Reg_model)) # no/few outliers ==> GOOD
+
+
+
+# For a line graph
+require(lsmeans)
+lsmip(Reg_model, Proficiency ~ Intervention, main="Multiple Regression", ylab="Score",xlab="Effect of Intervention", 
+      col = c("blue","red"), par.settings = list(fontsize = list(text = 16, points = 10)))
+
+
+
+# Effect size of each predictor separately
+# install.packages("lmSupport")
+require(lmSupport)
+modelEffectSizes(Reg_model) # Look at dR-sqr column 
+
+# The effect of proficiency is 0.466, meaning that 46.6% of the variance in the Score is explained 
+# by Proficiency. 
+
+# The effect of Intervention is 0.183, meaning that 18.3% of the variance in the Score is explained 
+# by Intervention. 
+
+# The effect of the Proficiency-Intervention interaction is 0.066, meaning that 6.6% of the variance 
+# in the Score is explained by interaction between Proficiency & Intervention.
+
+
+# When speaking of regression:
+# 50% or above is considered high 
+# 30% is considered moderate 
+# below 10% is considered low 
+# http://staff.bath.ac.uk/pssiw/stats2/page2/page14/page14.html
+
+
+
           # ---------------------------------------------------------------------------
                           # Two-Way Mixed ANOVA (only TWO variables/factors) 
                                  # Between-Subject Analysis
           # ---------------------------------------------------------------------------
 
 
-# model name <- lm (Dept. ~ Indep.1 * Indep.2 , data frame = data file name)
+# model name <- lm (Dependent ~ Indep.1 * Indep.2 , data frame = data file name)
 # let's call our model Model_ANOVA.
 
                             # Two-Way Mixed ANOVA model    ++++++++++++++
@@ -134,111 +242,3 @@ leveneTest(residuals(Model_ANOVA) ~ Proficiency, data= Mydata) # ONLY for the be
 #  Outliers
 boxplot(residuals(Model_ANOVA)) # no/few outliers ==> GOOD
 
-
-
-
-
-         # ----------------------------------------------------------------------------------
-                    # Multiple Linear Regression (More than ONE variables/factors)
-                                 # Between-Subject Analysis
-         # ----------------------------------------------------------------------------------
-
-                    # To make things easier, we will use the same dataset 
-
-
-                             
-# model name <- lm (Dept. ~ Indep.1 * Indep.2 , data frame = data file name)
-# let's call our model Reg_model.
-
-
-
-                            # Multiple Regression model
-Reg_model<- lm (Score ~ Proficiency * Intervention, data=Mydata)    
-summary(Reg_model) # Expected changes in Score relative to the reference groups == Advanced + After
-
-                           #  p > 0.05*  |   p > 0.01**   |    p > 0.001***
-
-
-#  Adjusted R-squared: 0.6733 ==> 67.3 % the variance in the predicted Score is explained 
-# by the effect of both Intervention and Proficiency above and beyond all other factors.
-# (which is a high percentage)
-
-levels(Mydata$Proficiency) 
-levels(Mydata$Intervention) 
-#  Intercept = Adavnced/After 
-
-# 1. The mean score of our baseline (Advanced/After) is 86.13 (look at the intercept value) 
-# above and beyond all other predictors. 
-
-
-# 2. The difference between the mean score of Intermediate/After and Advanced/After = 11.26 points apart), 
-# and that is statistically significant.(Intermediate/After = 86.13 - 11.27= 74.86667)
-
-# 2. The difference between the mean of Advanced/Before and Advanced/After = 7.06 points apart), 
-# and that is statistically significant.(Advanced/Before  = 86.13 - 7.06= 79.06)
-
-# 2. The difference between the mean of Intermediate/Before and Advanced/After = 86.1333 -11.26 -7.0667 + 6.00 = 73.80) 
-# and that is statistically significant.(Intermediate/Before  = 73.80)
-
-# 5. Because of the significant interaction, we will perform a post-hoc multiple comparsion:
-
-# we will use "lsmeans" fucntion 
-require(lsmeans)
-# you can choose which comparsion you want more based on your research question:
-
-# Levels of Skill on each Proficiency
-lsmeans(Reg_model, pairwise ~ Intervention | Proficiency, adjust="tukey") 
-
-# Levels of Proficiency on each Skill
-lsmeans(Reg_model, pairwise ~ Proficiency | Intervention, adjust="tukey") 
-
-# All possible comparsions (Just in case you need that!)
-# lsmeans(Reg_model, pairwise ~ Intervention * Proficiency, adjust="tukey") 
-
-
-             
-                                           # Tests of assumptions
-
-# Assumption 1: Normality
-hist(residuals(Reg_model)) # We hope for a normal histogram curve (Bell shape)
-shapiro.test(residuals(Reg_model)) # If NOT significant ==> GOOD
-
-# QQ-plot 
-plot(Reg_model,2)  
-
-
-# Assumption 2: Homogeneity of Variance
-# require(car)
-leveneTest(residuals(Reg_model) ~ Proficiency, data= Mydata) # only for the bewteen-subjects variable.
-# If NOT significant ==> GOOD
-
-# Outliers
-boxplot(residuals(Reg_model)) # no/few outliers ==> GOOD
-
-
-
-# For a line graph
-require(lsmeans)
-lsmip(Reg_model, Proficiency ~ Intervention, main="Multiple Regression", ylab="Score",xlab="Effect of Intervention", 
-      col = c("blue","red"), par.settings = list(fontsize = list(text = 16, points = 10)))
-
-
-
-# Effect size of each predictor separately
-# install.packages("lmSupport")
-require(lmSupport)
-modelEffectSizes(Reg_model) # Look at dR-sqr column 
-
-# The effect of proficiency is 0.466, meaning that 46.6% of the variance in the Score is explained 
-# by Proficiency. 
-
-# The effect of Intervention is 0.183, meaning that 18.3% of the variance in the Score is explained 
-# by Intervention. 
-
-# The effect of the Proficiency-Intervention interaction is 0.066, meaning that 6.6% of the variance 
-# in the Score is explained by interaction between Proficiency & Intervention.
-
-# When talking about effect size:
-# 80% or above is considered a high effect size
-# 50% is considered a moderate effect size
-# below 20% is considered a low effect size
